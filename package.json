@@ -1,0 +1,12 @@
+{
+  "name": "high-emotional-intelligence-social-skill",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "darwin:ci": "node scripts/darwin-ci.mjs --write-readme --write-report",
+    "darwin:ai": "node scripts/darwin-ai-review.mjs"
+  },
+  "dependencies": {
+    "openai": "^6.34.0"
+  }
+}

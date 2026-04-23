@@ -1,0 +1,183 @@
+name: Darwin Evolution
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "SKILL.md"
+      - "README.md"
+      - "references/**"
+      - "test-prompts.json"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/darwin-ci.mjs"
+      - "scripts/darwin-ai-review.mjs"
+      - ".github/workflows/darwin-evolution.yml"
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "report 仅生成报告；autofix-pr 允许为 README 自动同步块创建 PR"
+        required: true
+        default: report
+        type: choice
+        options:
+          - report
+          - autofix-pr
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: darwin-evolution
+  cancel-in-progress: false
+
+jobs:
+  darwin:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Darwin CI evaluation
+        run: node scripts/darwin-ci.mjs --write-readme --write-report
+
+      - name: Run Darwin AI semantic review
+        run: node scripts/darwin-ai-review.mjs
+
+      - name: Publish job summary
+        run: |
+          cat .darwin/darwin-report.md >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          cat .darwin/darwin-ai-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Darwin artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: darwin-evolution-report
+          path: .darwin/
+
+      - name: Create or update Darwin issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const body = fs.readFileSync(".darwin/darwin-report.md", "utf8");
+            const title = "Darwin Evolution Report";
+            const { owner, repo } = context.repo;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+
+            const existing = issues.find(
+              (issue) => issue.title === title && !issue.pull_request,
+            );
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                title,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+              });
+            }
+
+      - name: Create or update Darwin AI review issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const body = fs.readFileSync(".darwin/darwin-ai-report.md", "utf8");
+            const title = "Darwin AI Review";
+            const { owner, repo } = context.repo;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+
+            const existing = issues.find(
+              (issue) => issue.title === title && !issue.pull_request,
+            );
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                title,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+              });
+            }
+
+      - name: Detect README auto-sync changes
+        id: diff
+        run: |
+          if git diff --quiet -- README.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request for auto-fixable changes
+        if: steps.diff.outputs.changed == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'autofix-pr'))
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ci/darwin-evolution
+          delete-branch: true
+          commit-message: |
+            chore: sync darwin ci summary
+          title: "chore: sync darwin ci summary"
+          body: |
+            ## Summary
+            - sync the auto-generated Darwin blocks in `README.md`
+            - keep the trigger list and Darwin CI summary aligned with `SKILL.md`
+            - attach the latest structural evaluation signals from `SKILL.md` and `test-prompts.json`
+            - keep the repo's Darwin governance docs aligned after CI runs
+
+            ## Test plan
+            - [x] Run `node scripts/darwin-ci.mjs --write-readme --write-report`
+            - [x] Run `node scripts/darwin-ai-review.mjs`
+            - [x] Confirm `.darwin/darwin-report.md` is generated
+            - [x] Confirm `.darwin/darwin-ai-report.md` is generated
+            - [x] Confirm only auto-syncable README content is changed
