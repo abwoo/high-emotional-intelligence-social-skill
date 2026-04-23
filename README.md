@@ -3,8 +3,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-SKILL.md-blueviolet)](SKILL.md)
 [![Skills](https://img.shields.io/badge/skills.sh-Compatible-green)](https://skills.sh)
+[![Darwin Evolution](https://github.com/abwoo/high-emotional-intelligence-social-skill/actions/workflows/darwin-evolution.yml/badge.svg)](https://github.com/abwoo/high-emotional-intelligence-social-skill/actions/workflows/darwin-evolution.yml)
+[![GitHub Repo Stars](https://img.shields.io/github/stars/abwoo/high-emotional-intelligence-social-skill?style=social)](https://github.com/abwoo/high-emotional-intelligence-social-skill/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/abwoo/high-emotional-intelligence-social-skill)](https://github.com/abwoo/high-emotional-intelligence-social-skill/issues)
 
-**主入口**：全场景高情商沟通 —— 多文件夹 SOP、通用核心能力、8 类人群 × 5 模块、辩证与增量融合层；统一人设见下文。
+**主入口**：全场景高情商沟通 —— 多文件夹 SOP、通用核心能力、8 类人群 × 5 模块、辩证与增量融合层；统一人设见下文。  
+**仓库定位**：这是一个可直接被 Cursor / Agent 加载的中文社交沟通 Skill，同时也是一个带 **Darwin 自动进化流水线** 的公开 GitHub 仓库。
+
+## 快速入口
+
+- **安装 Skill**：`npx skills add abwoo/high-emotional-intelligence-social-skill`
+- **查看协议**：[`SKILL.md`](SKILL.md)
+- **触发词清单**：见下方 [触发词一览](#触发词一览与-skillmd-的-description-同步)
+- **自动进化说明**：见下方 [GitHub Actions 自动进化](#github-actions-自动进化推到-github-后可用)
+- **Darwin workflow**：[Actions / Darwin Evolution](https://github.com/abwoo/high-emotional-intelligence-social-skill/actions/workflows/darwin-evolution.yml)
+- **Darwin 结构报告**：[Issue #1](https://github.com/abwoo/high-emotional-intelligence-social-skill/issues/1)
+- **Darwin AI 评审**：[Issue #2](https://github.com/abwoo/high-emotional-intelligence-social-skill/issues/2)
+- **提交问题 / 建议**：[GitHub Issues](https://github.com/abwoo/high-emotional-intelligence-social-skill/issues)
 
 ```bash
 npx skills add abwoo/high-emotional-intelligence-social-skill
@@ -14,6 +29,7 @@ npx skills add abwoo/high-emotional-intelligence-social-skill
 
 > **v2**：多文件夹、全生命周期 SOP、通用核心能力 + 8 类人群 × 5 模块，可直接落地。
 > **v1**：速查单文件版，已归档至 `_v1速查版/`，适合随手搜一句。
+> **Darwin 自动进化**：已接入 GitHub Actions，可自动同步 README 触发词、生成结构报告，并在配置 `OPENAI_API_KEY` 后生成语义级 AI 评审。
 
 ---
 
